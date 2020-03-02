@@ -1,0 +1,50 @@
+{
+  "variables": {
+    "build_id": "win2019-{{timestamp}}"
+  },
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "vm_name": "{{user `build_id`}}",
+      "guest_os_type": "Windows10_64",
+      "iso_url": "https://software-download.microsoft.com/download/pr/17763.737.190906-2324.rs5_release_svc_refresh_SERVER_EVAL_x64FRE_en-us_1.iso",
+      "iso_checksum": "549bca46c055157291be6c22a3aaaed8330e78ef4382c99ee82c896426a1cee1",
+      "iso_checksum_type": "sha256",
+      "headless": "false",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "8192"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "4"
+        ]
+      ],
+      "disk_size": "20480",
+      "floppy_files": "floppy",
+      "boot_wait": "10s",
+      "communicator": "ssh",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_timeout": "15m",
+      "guest_additions_mode": "disable",
+      "shutdown_command": "A:/shutdown.cmd",
+      "shutdown_timeout": "10m",
+      "post_shutdown_delay": "5s",
+      "output_directory": "./out-{{user `build_id`}}"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "compression_level": 9,
+      "vagrantfile_template": "Vagrantfile",
+      "output": "{{user `build_id`}}_{{.BuildName}}_{{.Provider}}.box"
+    }
+  ]
+}
