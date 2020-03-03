@@ -16,13 +16,13 @@
           "modifyvm",
           "{{.Name}}",
           "--memory",
-          "8192"
+          "4096"
         ],
         [
           "modifyvm",
           "{{.Name}}",
           "--cpus",
-          "4"
+          "2"
         ]
       ],
       "disk_size": "20480",

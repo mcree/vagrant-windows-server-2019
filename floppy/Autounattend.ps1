@@ -41,21 +41,24 @@ wmic useraccount where "name='vagrant'" set PasswordExpires=FALSE
 Write-Host "Disable Windows Defender"
 Set-MpPreference -DisableRealtimeMonitoring $True -ExclusionPath "C:\"
 
+Write-Host "Disable Storage Sense"
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\StorageSense" /v AllowStorageSenseGlobal /d 0 /t REG_DWORD /f
+
 Write-Host "Disable Windows Updates"
-reg add "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU" /v NoAutoUpdate /d 1 /t REG_DWORD /f /reg:64
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate /d 1 /t REG_DWORD /f /reg:64
 
 Write-Host "Disable Windows Store Updates"
-reg add "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\WindowsStore" /v AutoDownload /d 2 /t REG_DWORD /f /reg:64
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\WindowsStore" /v AutoDownload /d 2 /t REG_DWORD /f /reg:64
 
 Write-Host "Disable Maintenance"
-reg add "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\Maintenance" /v MaintenanceDisabled /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\Maintenance" /v MaintenanceDisabled /t REG_DWORD /d 1 /f
 
 Write-Host "Disable UAC"
-reg add "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v EnableLUA /t REG_DWORD /d 0 /f
-reg add "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
 
 Write-Host "Enable Remote Desktop"
-reg add "HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
 netsh advfirewall firewall add rule name="Remote Desktop" dir=in localport=3389 protocol=TCP action=allow
 
 Write-Host "Installing VirtualBox Guest Additions"
@@ -73,19 +76,21 @@ choco install virtualbox-guest-additions-guest.install -y
 
 Write-Host "Cleaning up system"
 @(
-    "$env:localappdata\\temp\\*",
-    "$env:windir\\temp\\*",
-    "$env:windir\\logs",
-    "$env:windir\\panther",
-    "$env:windir\\winsxs\\manifestcache",
-    "$env:programdata\\Microsoft\\Windows Defender\\Scans\\*"
+    "$env:localappdata\temp\*",
+    "$env:windir\temp\*",
+    "$env:windir\logs",
+    "$env:windir\panther",
+    "$env:windir\winsxs\manifestcache",
+    "$env:programdata\Microsoft\Windows Defender\Scans\*"
 ) | % {
   Write-Host "Removing $_"
   try {
     Takeown /d Y /R /f $_
     Icacls $_ /GRANT:r administrators:F /T /c /q  2>&1 | Out-Null
     Remove-Item $_ -Recurse -Force | Out-Null
-  } catch { $global:error.RemoveAt(0) }
+  } catch {
+      $global:error.RemoveAt(0)
+  }
 }
 
 Write-Host "Optimizing volume"
