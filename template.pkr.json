@@ -1,6 +1,8 @@
 {
   "variables": {
-    "build_id": "win2019-{{timestamp}}"
+    "build_id": "win2019-{{timestamp}}",
+    "cloud_token": "{{ env `VAGRANT_CLOUD_TOKEN` }}",
+    "version": "1.0.{{timestamp}}"
   },
   "builders": [
     {
@@ -40,11 +42,19 @@
     }
   ],
   "post-processors": [
-    {
-      "type": "vagrant",
-      "compression_level": 9,
-      "vagrantfile_template": "Vagrantfile",
-      "output": "{{user `build_id`}}_{{.BuildName}}_{{.Provider}}.box"
-    }
+    [
+      {
+        "type": "vagrant",
+        "compression_level": 9,
+        "vagrantfile_template": "Vagrantfile.tpl",
+        "output": "{{user `build_id`}}_{{.BuildName}}_{{.Provider}}.box"
+      },
+      {
+        "type": "vagrant-cloud",
+        "box_tag": "mcree/win2019",
+        "access_token": "{{user `cloud_token`}}",
+        "version": "{{user `version`}}"
+      }
+    ]
   ]
 }
