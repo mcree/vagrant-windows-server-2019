@@ -53,7 +53,8 @@
         "type": "vagrant-cloud",
         "box_tag": "mcree/win2019",
         "access_token": "{{user `cloud_token`}}",
-        "version": "{{user `version`}}"
+        "version": "{{user `version`}}",
+        "version_description": "See: https://github.com/mcree/vagrant-windows-server-2019"
       }
     ]
   ]
